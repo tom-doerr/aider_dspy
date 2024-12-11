@@ -2,6 +2,8 @@ import os
 import unittest
 from unittest.mock import patch
 
+import pytest
+
 from aider.main import main
 
 
