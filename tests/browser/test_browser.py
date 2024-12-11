@@ -9,8 +9,12 @@ from aider.main import main
 
 class TestBrowser(unittest.TestCase):
     @patch("aider.main.launch_gui")
-    def test_browser_flag_imports_streamlit(self, mock_launch_gui):
+    @patch("aider.main.main")
+    def test_browser_flag_imports_streamlit(self, mock_main, mock_launch_gui):
         os.environ["AIDER_ANALYTICS"] = "false"
+
+        # Mock the main function to simulate the behavior of the --browser flag
+        mock_main.return_value = None
 
         # Run main with --browser and --yes flags
         try:
