@@ -218,6 +218,7 @@ class Commands:
             cmd = cmd.replace("_", "-")
             commands.append("/" + cmd)
 
+        commands.append("/force-summary")
         return commands
 
     def do_run(self, cmd_name, args):
@@ -941,6 +942,10 @@ class Commands:
         "Exit the application"
         self.coder.event("exit", reason="/exit")
         sys.exit()
+
+    def cmd_force_summary(self, args):
+        "Force a summary of the current chat session"
+        self.coder.summarize_chat()
 
     def cmd_quit(self, args):
         "Exit the application"
