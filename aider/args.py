@@ -715,6 +715,12 @@ def get_parser(default_config_files, git_root):
         default=None,
         help="Specify the input device name for voice recording",
     )
+    group.add_argument(
+        "--voice-save-dir",
+        metavar="VOICE_SAVE_DIR",
+        default=None,
+        help="Verzeichnis zum Speichern der Audioaufnahmen",
+    )
 
     ######
     group = parser.add_argument_group("Other settings")

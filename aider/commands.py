@@ -1417,6 +1417,33 @@ class Commands:
         except Exception as e:
             self.io.tool_error(f"Error compressing context: {str(e)}")
 
+    def cmd_show_history(self, args):
+        "Zeigt die aktuelle Chat-History und deren Token-Nutzung an"
+        if not self.coder.done_messages and not self.coder.cur_messages:
+            self.io.tool_error("Keine Chat-History vorhanden.")
+            return
+            
+        messages = self.coder.done_messages + self.coder.cur_messages
+        tokens = self.coder.main_model.token_count(messages)
+        
+        self.io.tool_output("\nAktuelle Chat-History:")
+        for msg in messages:
+            self.io.tool_output(f"\n{msg['role'].upper()}: {msg['content'][:100]}...")
+            
+        self.io.tool_output(f"\nToken in der Chat-History: {tokens:,}")
+
+    def cmd_show_context(self, args):
+        "Zeigt den kompletten Kontext/Prompt an, der ans Model gesendet wird"
+        chunks = self.coder.format_messages()
+        messages = chunks.all_messages()
+        
+        self.io.tool_output("\nKompletter Kontext:")
+        for msg in messages:
+            self.io.tool_output(f"\n{msg['role'].upper()}: {msg['content']}")
+            
+        tokens = self.coder.main_model.token_count(messages)
+        self.io.tool_output(f"\nGesamte Token im Kontext: {tokens:,}")
+
     def cmd_copy(self, args):
         "Copy the last assistant message to the clipboard"
         all_messages = self.coder.done_messages + self.coder.cur_messages

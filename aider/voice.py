@@ -36,7 +36,7 @@ class Voice:
 
     threshold = 0.15
 
-    def __init__(self, audio_format="wav", device_name=None):
+    def __init__(self, audio_format="wav", device_name=None, save_dir=None):
         if sf is None:
             raise SoundDeviceError
         try:
@@ -140,13 +140,29 @@ class Voice:
             while not self.q.empty():
                 file.write(self.q.get())
 
-        if self.audio_format != "wav":
-            filename = tempfile.mktemp(suffix=f".{self.audio_format}")
-            audio = AudioSegment.from_wav(temp_wav)
-            audio.export(filename, format=self.audio_format)
-            os.remove(temp_wav)
+        # Generate final filename
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        if self.save_dir:
+            os.makedirs(self.save_dir, exist_ok=True)
+            final_filename = os.path.join(self.save_dir, f"recording-{timestamp}.{self.audio_format}")
         else:
-            filename = temp_wav
+            if self.audio_format != "wav":
+                filename = tempfile.mktemp(suffix=f".{self.audio_format}")
+                audio = AudioSegment.from_wav(temp_wav)
+                audio.export(filename, format=self.audio_format)
+                os.remove(temp_wav)
+            else:
+                filename = temp_wav
+            final_filename = filename
+
+        # If save_dir is set, copy the file there
+        if self.save_dir and filename != final_filename:
+            if self.audio_format != "wav":
+                audio = AudioSegment.from_file(filename, format=self.audio_format)
+                audio.export(final_filename, format=self.audio_format)
+            else:
+                import shutil
+                shutil.copy2(filename, final_filename)
 
         with open(filename, "rb") as fh:
             try:
@@ -154,8 +170,17 @@ class Voice:
                     model="whisper-1", file=fh, prompt=history, language=language
                 )
             except Exception as err:
-                print(f"Unable to transcribe {filename}: {err}")
-                return
+                print(f"Fehler beim Transkribieren von {filename}: {err}")
+                if self.io.confirm_ask("Möchten Sie einen erneuten Transkriptionsversuch starten?"):
+                    try:
+                        transcript = litellm.transcription(
+                            model="whisper-1", file=fh, prompt=history, language=language
+                        )
+                    except Exception as retry_err:
+                        print(f"Erneuter Transkriptionsversuch fehlgeschlagen: {retry_err}")
+                        return
+                else:
+                    return
 
         if self.audio_format != "wav":
             os.remove(filename)
