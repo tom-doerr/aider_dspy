@@ -704,32 +704,6 @@ def get_parser(default_config_files, git_root):
         help="Audio format for voice recording (default: wav). webm and mp3 require ffmpeg",
     )
     group.add_argument(
-        "--voice-save-dir",
-        metavar="VOICE_SAVE_DIR",
-        type=str,
-        default=None,
-        help="Directory to save audio recordings (absolute path recommended)",
-    )
-    group.add_argument(
-        "--auto-submit-transcript",
-        action="store_true",
-        default=True,
-        help="Automatically submit transcribed audio (default: True)",
-    )
-    group.add_argument(
-        "--voice-save-dir",
-        metavar="VOICE_SAVE_DIR",
-        type=str,
-        default=None,
-        help="Directory to save audio recordings (absolute path recommended)",
-    )
-    group.add_argument(
-        "--auto-submit-transcript",
-        action="store_true",
-        default=True,
-        help="Automatically submit transcribed audio (default: True)",
-    )
-    group.add_argument(
         "--voice-language",
         metavar="VOICE_LANGUAGE",
         default="en",
@@ -745,13 +719,7 @@ def get_parser(default_config_files, git_root):
         "--voice-save-dir",
         metavar="VOICE_SAVE_DIR",
         default=None,
-        help="Directory to save audio recordings (absolute path recommended)",
-    )
-    group.add_argument(
-        "--dspy-mode",
-        action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Use DSPy for code edits (default: False)",
+        help="Directory to save audio recordings",
     )
     group.add_argument(
         "--auto-submit-transcript",
