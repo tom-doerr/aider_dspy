@@ -40,6 +40,10 @@ class Voice:
         if sf is None:
             raise SoundDeviceError
         self.save_dir = save_dir
+        if save_dir:
+            abs_save_dir = os.path.abspath(save_dir)
+            os.makedirs(abs_save_dir, exist_ok=True)
+            print(f"Voice recordings will be saved to: {abs_save_dir}")
         try:
             print("Initializing sound device...")
             import sounddevice as sd

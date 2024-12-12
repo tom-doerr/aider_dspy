@@ -290,6 +290,7 @@ class Coder:
         ignore_mentions=None,
         file_watcher=None,
         auto_copy_context=False,
+        dspy_mode=False,
     ):
         # Fill in a dummy Analytics if needed, but it is never .enable()'d
         self.analytics = analytics if analytics is not None else Analytics()
@@ -302,6 +303,15 @@ class Coder:
         self.abs_root_path_cache = {}
 
         self.auto_copy_context = auto_copy_context
+        self.dspy_mode = dspy_mode
+        self.dspy_editor = None
+        if dspy_mode:
+            try:
+                from aider.dspy_edit import DSPyEditModule
+                self.dspy_editor = DSPyEditModule()
+            except ImportError:
+                self.io.tool_error("Failed to initialize DSPy mode - falling back to standard edits")
+                self.dspy_mode = False
 
         self.ignore_mentions = ignore_mentions
         if not self.ignore_mentions:
