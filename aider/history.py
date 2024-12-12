@@ -90,7 +90,7 @@ class ChatSummary:
 
         return self.summarize(result, depth + 1)
 
-    def summarize_all(self, messages):
+    def summarize_all(self, messages, custom_prompt=None):
         content = ""
         for msg in messages:
             role = msg["role"].upper()
@@ -102,7 +102,7 @@ class ChatSummary:
                 content += "\n"
 
         summarize_messages = [
-            dict(role="system", content=prompts.summarize),
+            dict(role="system", content=custom_prompt or prompts.summarize),
             dict(role="user", content=content),
         ]
 

@@ -1354,6 +1354,46 @@ class Commands:
         "Toggle multiline mode (swaps behavior of Enter and Meta+Enter)"
         self.io.toggle_multiline_mode()
 
+    def cmd_compress_context(self, args):
+        "Compress/summarize the chat context, optionally with specific instructions"
+        
+        if not self.coder.done_messages and not self.coder.cur_messages:
+            self.io.tool_error("No chat context to compress.")
+            return
+
+        # Get all messages that need summarization
+        messages = self.coder.done_messages + self.coder.cur_messages
+        
+        if not messages:
+            return
+            
+        # If user provided instructions, add them to the summarize prompt
+        custom_prompt = prompts.summarize
+        if args.strip():
+            custom_prompt += f"\n\nAdditional instructions: {args.strip()}"
+        
+        # Create summarizer with custom prompt if provided
+        summarizer = ChatSummary(
+            [self.coder.main_model.weak_model, self.coder.main_model],
+            self.coder.main_model.max_chat_history_tokens,
+        )
+        
+        try:
+            # Summarize all messages
+            summary_messages = summarizer.summarize_all(messages, custom_prompt=custom_prompt)
+            
+            # Update the chat history with the summarized version
+            self.coder.done_messages = summary_messages
+            self.coder.cur_messages = []
+            
+            self.io.tool_output("Successfully compressed chat context.")
+            
+            # Show token counts
+            self.cmd_tokens("")
+            
+        except Exception as e:
+            self.io.tool_error(f"Error compressing context: {str(e)}")
+
     def cmd_copy(self, args):
         "Copy the last assistant message to the clipboard"
         all_messages = self.coder.done_messages + self.coder.cur_messages
