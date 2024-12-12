@@ -717,6 +717,19 @@ def get_parser(default_config_files, git_root):
         help="Automatically submit transcribed audio (default: True)",
     )
     group.add_argument(
+        "--voice-save-dir",
+        metavar="VOICE_SAVE_DIR",
+        type=str,
+        default=None,
+        help="Directory to save audio recordings (absolute path recommended)",
+    )
+    group.add_argument(
+        "--auto-submit-transcript",
+        action="store_true",
+        default=True,
+        help="Automatically submit transcribed audio (default: True)",
+    )
+    group.add_argument(
         "--voice-language",
         metavar="VOICE_LANGUAGE",
         default="en",
