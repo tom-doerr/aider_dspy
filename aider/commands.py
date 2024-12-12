@@ -944,8 +944,12 @@ class Commands:
         sys.exit()
 
     def cmd_force_summary(self, args):
-        "Force a summary of the current chat session"
+        "Force a summary of the current chat session (alias: /summarize)"
         self.coder.summarize_chat()
+
+    def cmd_summarize(self, args):
+        "Force a summary of the current chat session (alias: /force-summary)"
+        self.cmd_force_summary(args)
 
     def cmd_quit(self, args):
         "Exit the application"
