@@ -192,7 +192,7 @@ class Coder:
         else:
             prefix = "Model"
 
-        output = f"{prefix}: {main_model.name} with {self.edit_format} edit format"
+        output = f"{prefix}: {main_model.name} with {self.edit_format} edit format{' (DSPy mode)' if self.dspy_mode else ''}"
         if self.add_cache_headers or main_model.caches_by_default:
             output += ", prompt cache"
         if main_model.info.get("supports_assistant_prefill"):
