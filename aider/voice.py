@@ -39,6 +39,7 @@ class Voice:
     def __init__(self, audio_format="wav", device_name=None, save_dir=None):
         if sf is None:
             raise SoundDeviceError
+        self.save_dir = save_dir
         try:
             print("Initializing sound device...")
             import sounddevice as sd
