@@ -719,7 +719,19 @@ def get_parser(default_config_files, git_root):
         "--voice-save-dir",
         metavar="VOICE_SAVE_DIR",
         default=None,
-        help="Verzeichnis zum Speichern der Audioaufnahmen",
+        help="Directory to save audio recordings",
+    )
+    group.add_argument(
+        "--auto-submit-transcript",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Automatically submit transcribed audio (default: True)",
+    )
+    group.add_argument(
+        "--max-lint-retries",
+        type=int,
+        default=3,
+        help="Maximum number of auto-lint retry attempts (default: 3)",
     )
 
     ######

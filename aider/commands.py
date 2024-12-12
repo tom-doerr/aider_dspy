@@ -1418,22 +1418,22 @@ class Commands:
             self.io.tool_error(f"Error compressing context: {str(e)}")
 
     def cmd_show_history(self, args):
-        "Zeigt die aktuelle Chat-History und deren Token-Nutzung an"
+        "Show the current chat history and its token usage"
         if not self.coder.done_messages and not self.coder.cur_messages:
-            self.io.tool_error("Keine Chat-History vorhanden.")
+            self.io.tool_error("No chat history available.")
             return
             
         messages = self.coder.done_messages + self.coder.cur_messages
         tokens = self.coder.main_model.token_count(messages)
         
-        self.io.tool_output("\nAktuelle Chat-History:")
+        self.io.tool_output("\nCurrent Chat History:")
         for msg in messages:
             self.io.tool_output(f"\n{msg['role'].upper()}: {msg['content'][:100]}...")
             
-        self.io.tool_output(f"\nToken in der Chat-History: {tokens:,}")
+        self.io.tool_output(f"\nTokens in chat history: {tokens:,}")
 
     def cmd_show_context(self, args):
-        "Zeigt den kompletten Kontext/Prompt an, der ans Model gesendet wird"
+        "Show the complete context/prompt that will be sent to the model"
         chunks = self.coder.format_messages()
         messages = chunks.all_messages()
         

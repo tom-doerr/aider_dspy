@@ -171,14 +171,19 @@ class Voice:
                     model="whisper-1", file=fh, prompt=history, language=language
                 )
             except Exception as err:
-                print(f"Fehler beim Transkribieren von {filename}: {err}")
-                if self.io.confirm_ask("Möchten Sie einen erneuten Transkriptionsversuch starten?"):
+                print(f"Error transcribing {filename}: {err}")
+                if hasattr(self, 'auto_submit_transcript') and self.auto_submit_transcript:
+                    retry = True
+                else:
+                    retry = self.io.confirm_ask("Would you like to retry transcription?")
+                
+                if retry:
                     try:
                         transcript = litellm.transcription(
                             model="whisper-1", file=fh, prompt=history, language=language
                         )
                     except Exception as retry_err:
-                        print(f"Erneuter Transkriptionsversuch fehlgeschlagen: {retry_err}")
+                        print(f"Transcription retry failed: {retry_err}")
                         return
                 else:
                     return
