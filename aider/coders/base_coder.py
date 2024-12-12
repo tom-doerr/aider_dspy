@@ -309,6 +309,7 @@ class Coder:
             try:
                 from aider.dspy_edit import DSPyEditModule
                 self.dspy_editor = DSPyEditModule()
+                self.io.tool_output("DSPy mode activated - using DSPy for code edits")
             except ImportError:
                 self.io.tool_error("Failed to initialize DSPy mode - falling back to standard edits")
                 self.dspy_mode = False

@@ -36,14 +36,14 @@ class Voice:
 
     threshold = 0.15
 
-    def __init__(self, audio_format="wav", device_name=None, save_dir=None):
+    def __init__(self, audio_format="wav", device_name=None, save_dir=None, auto_submit=True):
         if sf is None:
             raise SoundDeviceError
         self.save_dir = save_dir
+        self.auto_submit_transcript = auto_submit
         if save_dir:
             abs_save_dir = os.path.abspath(save_dir)
             os.makedirs(abs_save_dir, exist_ok=True)
-            print(f"Voice recordings will be saved to: {abs_save_dir}")
         try:
             print("Initializing sound device...")
             import sounddevice as sd
