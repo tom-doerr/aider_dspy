@@ -183,6 +183,10 @@ class Coder:
         lines = []
         lines.append(f"Aider v{__version__}")
 
+        # DSPy status if enabled
+        if hasattr(self, '_announcements'):
+            lines.extend(self._announcements)
+
         # Model
         main_model = self.main_model
         weak_model = main_model.weak_model
@@ -309,10 +313,17 @@ class Coder:
             try:
                 from aider.dspy_edit import DSPyEditModule
                 self.dspy_editor = DSPyEditModule()
-                self.io.tool_output("DSPy mode activated - using DSPy for code edits")
+                self.io.tool_output("DSPy mode activated - using DSPy for code edits", bold=True)
+                # Add DSPy mode to announcements
+                if not hasattr(self, '_announcements'):
+                    self._announcements = []
+                self._announcements.append("DSPy mode: Enabled - using DSPy for code edits")
             except ImportError:
                 self.io.tool_error("Failed to initialize DSPy mode - falling back to standard edits")
                 self.dspy_mode = False
+                if not hasattr(self, '_announcements'):
+                    self._announcements = []
+                self._announcements.append("DSPy mode: Failed to initialize - using standard edits")
 
         self.ignore_mentions = ignore_mentions
         if not self.ignore_mentions:
