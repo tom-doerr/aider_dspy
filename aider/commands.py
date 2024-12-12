@@ -82,6 +82,28 @@ class Commands:
         models.sanity_check_models(self.io, model)
         raise SwitchCoder(main_model=model)
 
+    def cmd_weak_model(self, args):
+        "Set the weak model used for summarization and commit messages"
+        
+        model_name = args.strip()
+        if not model_name:
+            self.io.tool_error("Please provide a model name")
+            return
+            
+        model = models.Model(model_name)
+        models.sanity_check_models(self.io, model)
+        
+        # Update the weak model
+        self.coder.main_model.weak_model = model
+        
+        # Update the summarizer to use the new weak model
+        self.coder.summarizer = ChatSummary(
+            [model, self.coder.main_model],
+            self.coder.main_model.max_chat_history_tokens,
+        )
+        
+        self.io.tool_output(f"Set weak model to {model_name}")
+
     def cmd_chat_mode(self, args):
         "Switch to a new chat mode"
 
