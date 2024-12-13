@@ -57,6 +57,7 @@ class DSPySearchReplaceModule(dspy.Module):
 
     def _parse_blocks(self, content: str, files: List[str]) -> List[Tuple[Optional[str], str, str]]:
         """Internal helper for block parsing - used to train DSPy"""
+        try:
             HEAD = r"^<{5,9} SEARCH\s*$"
             DIVIDER = r"^={5,9}\s*$"
             UPDATED = r"^>{5,9} REPLACE\s*$"
@@ -109,7 +110,7 @@ class DSPySearchReplaceModule(dspy.Module):
                             "\n".join(replace_lines)
                         ))
                 i += 1
-                
+            
             return edits
             
         except Exception as e:
