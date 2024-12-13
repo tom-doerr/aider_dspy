@@ -3,13 +3,11 @@ from aider.dspy_search_replace import DSPySearchReplaceModule
 
 class DSPySearchReplaceCoder(Coder):
     edit_format = "dspy-search-replace"
+    gpt_prompts = EditBlockPrompts()  # Set gpt_prompts during class definition
 
     def __init__(self, main_model, io, **kwargs):
         super().__init__(main_model, io, **kwargs)
         self.dspy_search_replace = DSPySearchReplaceModule()
-        self.gpt_prompts = kwargs.get("gpt_prompts")
-        if self.gpt_prompts is None:
-            raise ValueError("gpt_prompts is not initialized. Please ensure it is set during class initialization.")
 
     def apply_edit(self, edit, fname, content):
         search_text, replace_text = edit
