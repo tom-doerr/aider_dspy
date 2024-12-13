@@ -20,33 +20,15 @@ class ParseEditSignature(dspy.Signature):
 
 class DSPySearchReplaceModule(dspy.Module):
     """Module for generating code edits using DSPy"""
-    def __init__(self, gpt_prompts=None, model=None):
+    def __init__(self, gpt_prompts=None):
         super().__init__()
         self.gpt_prompts = gpt_prompts
-        if model:
-            # Create a DSPy-compatible model wrapper
-            dspy_model = dspy.OpenAI(model=model.model_name)
-            dspy.settings.configure(lm=dspy_model)
         self.parse_predictor = dspy.ChainOfThought(ParseEditSignature)
         self.find_predictor = dspy.ChainOfThought(FindEditSignature)
 
     def generate_edits(self, content: str, files: List[str]) -> List[Tuple[Optional[str], str, str]]:
-        """Generate search/replace edits from LLM response using DSPy"""
-        try:
-            default_parse_prompt = """Parse the response into a list of edits. Each edit should be a tuple of (filename, search_content, replace_content).
-For shell commands (marked with ```bash), return a tuple of (None, command, "").
-Ignore any other content that is not in a SEARCH/REPLACE block or bash block."""
-
-            result = self.parse_predictor(
-                content=content,
-                files=files,
-                prompt=default_parse_prompt
-            )
-            print(f"Parsing reasoning: {result.reasoning}")
-            return result.edits
-        except Exception as e:
-            print(f"DSPy edit parsing failed: {e}")
-            return []
+        """Generate search/replace edits from LLM response"""
+        return self._parse_blocks(content, files)
 
     def replace_content(self, content: str, search: str, replace: str) -> Optional[str]:
         """Use DSPy to find and replace content"""

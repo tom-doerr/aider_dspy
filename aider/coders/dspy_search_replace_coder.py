@@ -11,10 +11,7 @@ class DSPySearchReplaceCoder(Coder):
 
     def __init__(self, main_model, io, **kwargs):
         super().__init__(main_model, io, **kwargs)
-        self.dspy_search_replace = DSPySearchReplaceModule(self.gpt_prompts, main_model)
-        
-        # Train DSPy module on example edits
-        self._train_dspy_module()
+        self.dspy_search_replace = DSPySearchReplaceModule(self.gpt_prompts)
         
     def _train_dspy_module(self):
         """Train the DSPy module on example edits"""
