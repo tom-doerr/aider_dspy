@@ -60,6 +60,7 @@ Return the modified content if a match is found, otherwise return None."""
             lines = content.splitlines()
             i = 0
             current_file = None
+            in_code_block = False
             
             while i < len(lines):
                 line = lines[i].strip()
@@ -75,15 +76,21 @@ Return the modified content if a match is found, otherwise return None."""
                     i += 1
                     continue
                 
-                # Look for filename
-                if line and not line.startswith(("```", "<", "=", ">")):
+                # Handle code fence markers
+                if line.startswith("```"):
+                    in_code_block = not in_code_block
+                    i += 1
+                    continue
+                
+                # Look for filename outside code blocks
+                if not in_code_block and line and not line.startswith(("```", "<", "=", ">")):
                     if line in files or any(Path(f).name == line for f in files):
                         current_file = line
                     i += 1
                     continue
                 
-                # Look for search/replace blocks
-                if re.match(HEAD, line):
+                # Look for search/replace blocks inside code blocks
+                if in_code_block and re.match(HEAD, line):
                     search_lines = []
                     i += 1
                     while i < len(lines) and not re.match(DIVIDER, lines[i].strip()):
