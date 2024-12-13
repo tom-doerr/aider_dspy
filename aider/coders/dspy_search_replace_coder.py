@@ -19,14 +19,9 @@ class DSPySearchReplaceCoder(Coder):
         return content.replace(search_text, replace_text)
 
     # def get_edits(self, fnames, content, edit_request):
-    def get_edits(self, fnames, content, edit_request):
+    def get_edits(self):
         edits = {}
         for fname, file_content in zip(fnames, content):
-            edit = self.dspy_search_replace.generate_search_replace(
-                file_name=fname,
-                file_content=file_content,
-                edit_request=edit_request,
-            )
             edit = self.dspy_search_replace.generate_search_replace(
                 file_name=fname,
                 file_content=file_content,
