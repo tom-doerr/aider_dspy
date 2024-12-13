@@ -3,8 +3,15 @@ import dspy
 from typing import Optional, List, Tuple
 from pathlib import Path
 
-class SearchReplaceSignature(dspy.Signature):
-    """Signature for code editing with search/replace blocks"""
+class FindEditSignature(dspy.Signature):
+    """Signature for finding matching content in a file"""
+    content: str = dspy.InputField(desc="The file content to search in")
+    search: str = dspy.InputField(desc="The text to search for")
+    replace: str = dspy.InputField(desc="The text to replace with") 
+    result: Optional[str] = dspy.OutputField(desc="The modified content with replacement made, or None if no match")
+
+class ParseEditSignature(dspy.Signature):
+    """Signature for parsing edit blocks from LLM response"""
     content: str = dspy.InputField(desc="The LLM response containing search/replace blocks")
     files: List[str] = dspy.InputField(desc="List of files that can be edited")
     edits: List[Tuple[Optional[str], str, str]] = dspy.OutputField(
@@ -16,12 +23,33 @@ class DSPySearchReplaceModule(dspy.Module):
     def __init__(self, gpt_prompts=None):
         super().__init__()
         self.gpt_prompts = gpt_prompts
-        self.predictor = dspy.Predict(SearchReplaceSignature)
+        self.parse_predictor = dspy.Predict(ParseEditSignature)
+        self.find_predictor = dspy.Predict(FindEditSignature)
 
     def generate_edits(self, content: str, files: List[str]) -> List[Tuple[Optional[str], str, str]]:
-        """Generate search/replace edits from LLM response"""
+        """Generate search/replace edits from LLM response using DSPy"""
         try:
-            # Parse the content into blocks using regex patterns
+            result = self.parse_predictor(content=content, files=files)
+            return result.edits
+        except Exception as e:
+            print(f"DSPy edit parsing failed: {e}")
+            return []
+
+    def replace_content(self, content: str, search: str, replace: str) -> Optional[str]:
+        """Use DSPy to find and replace content"""
+        try:
+            result = self.find_predictor(
+                content=content,
+                search=search,
+                replace=replace
+            )
+            return result.result
+        except Exception as e:
+            print(f"DSPy content replacement failed: {e}")
+            return None
+
+    def _parse_blocks(self, content: str, files: List[str]) -> List[Tuple[Optional[str], str, str]]:
+        """Internal helper for block parsing - used to train DSPy"""
             HEAD = r"^<{5,9} SEARCH\s*$"
             DIVIDER = r"^={5,9}\s*$"
             UPDATED = r"^>{5,9} REPLACE\s*$"
