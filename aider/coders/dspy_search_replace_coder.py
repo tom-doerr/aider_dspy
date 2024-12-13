@@ -87,19 +87,15 @@ Just reply with fixed versions of the {blocks} above that failed to match.
 
     def get_edits(self):
         content = self.partial_response_content
-
-        # Use original block parsing until DSPy implementation is ready
-        edits = list(
-            find_original_update_blocks(
-                content,
-                self.fence,
-                self.get_inchat_relative_files(),
-            )
-        )
-
+        files = self.get_inchat_relative_files()
+        
+        # Use DSPy to generate edits
+        edits = self.dspy_search_replace.generate_edits(content, files)
+        
+        # Extract shell commands
         self.shell_commands += [edit[1] for edit in edits if edit[0] is None]
         edits = [edit for edit in edits if edit[0] is not None]
-
+        
         return edits
 
     def dspy_do_replace(self, fname, content, original, updated, fence=None):

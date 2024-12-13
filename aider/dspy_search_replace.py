@@ -21,8 +21,62 @@ class DSPySearchReplaceModule(dspy.Module):
     def generate_edits(self, content: str, files: List[str]) -> List[Tuple[Optional[str], str, str]]:
         """Generate search/replace edits from LLM response"""
         try:
-            result = self.predictor(content=content, files=files)
-            return result.edits
+            # Parse the content into blocks using regex patterns
+            HEAD = r"^<{5,9} SEARCH\s*$"
+            DIVIDER = r"^={5,9}\s*$"
+            UPDATED = r"^>{5,9} REPLACE\s*$"
+            FENCE = r"^```"
+            
+            edits = []
+            lines = content.splitlines()
+            i = 0
+            current_file = None
+            
+            while i < len(lines):
+                line = lines[i].strip()
+                
+                # Check for shell commands in code blocks
+                if line.startswith("```") and any(line.startswith(f"```{sh}") for sh in ["bash", "sh", "shell"]):
+                    shell_content = []
+                    i += 1
+                    while i < len(lines) and not lines[i].strip().startswith("```"):
+                        shell_content.append(lines[i])
+                        i += 1
+                    edits.append((None, "\n".join(shell_content), ""))
+                    i += 1
+                    continue
+                
+                # Look for filename
+                if line and not line.startswith(("```", "<", "=", ">")):
+                    if line in files or any(Path(f).name == line for f in files):
+                        current_file = line
+                    i += 1
+                    continue
+                
+                # Look for search/replace blocks
+                if re.match(HEAD, line):
+                    search_lines = []
+                    i += 1
+                    while i < len(lines) and not re.match(DIVIDER, lines[i].strip()):
+                        search_lines.append(lines[i])
+                        i += 1
+                    
+                    replace_lines = []
+                    i += 1
+                    while i < len(lines) and not re.match(UPDATED, lines[i].strip()):
+                        replace_lines.append(lines[i])
+                        i += 1
+                        
+                    if current_file:
+                        edits.append((
+                            current_file,
+                            "\n".join(search_lines),
+                            "\n".join(replace_lines)
+                        ))
+                i += 1
+                
+            return edits
+            
         except Exception as e:
             print(f"DSPy edit generation failed: {e}")
             return []
