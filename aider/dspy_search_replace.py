@@ -31,22 +31,16 @@ class DSPySearchReplaceModule(dspy.Module):
         return self._parse_blocks(content, files)
 
     def replace_content(self, content: str, search: str, replace: str) -> Optional[str]:
-        """Use DSPy to find and replace content"""
-        try:
-            default_find_prompt = """Find the search text in the content and replace it with the replace text.
-Return the modified content if a match is found, otherwise return None."""
-
-            result = self.find_predictor(
-                content=content,
-                search=search,
-                replace=replace,
-                prompt=default_find_prompt
-            )
-            print(f"Replacement reasoning: {result.reasoning}")
-            return result.result
-        except Exception as e:
-            print(f"DSPy content replacement failed: {e}")
-            return None
+        """Replace search text with replace text in content using exact matching"""
+        if not search.strip():
+            return content + replace
+            
+        # Try exact match first
+        if search in content:
+            return content.replace(search, replace, 1)
+            
+        # If no exact match, return None
+        return None
 
     def _parse_blocks(self, content: str, files: List[str]) -> List[Tuple[Optional[str], str, str]]:
         """Internal helper for block parsing - used to train DSPy"""
