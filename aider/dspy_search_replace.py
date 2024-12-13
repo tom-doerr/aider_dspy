@@ -4,32 +4,37 @@ from typing import Optional, List, Tuple
 from pathlib import Path
 
 class FindEditSignature(dspy.Signature):
-    """Signature for finding matching content in a file"""
-    content: str = dspy.InputField(desc="The file content to search in")
-    search: str = dspy.InputField(desc="The text to search for")
-    replace: str = dspy.InputField(desc="The text to replace with") 
-    result: Optional[str] = dspy.OutputField(desc="The modified content with replacement made, or None if no match")
+    """Find and replace content in a file"""
+    content = dspy.InputField(desc="The file content to search in")
+    search = dspy.InputField(desc="The text to search for")
+    replace = dspy.InputField(desc="The text to replace with")
+    reasoning = dspy.OutputField(desc="Step by step reasoning about how to match and replace")
+    result = dspy.OutputField(desc="The modified content with replacement made, or None if no match")
 
 class ParseEditSignature(dspy.Signature):
-    """Signature for parsing edit blocks from LLM response"""
-    content: str = dspy.InputField(desc="The LLM response containing search/replace blocks")
-    files: List[str] = dspy.InputField(desc="List of files that can be edited")
-    edits: List[Tuple[Optional[str], str, str]] = dspy.OutputField(
-        desc="List of (filename, search_text, replace_text) tuples. filename=None for shell commands"
-    )
+    """Parse edit blocks from LLM response"""
+    content = dspy.InputField(desc="The LLM response containing search/replace blocks")
+    files = dspy.InputField(desc="List of files that can be edited")
+    reasoning = dspy.OutputField(desc="Step by step reasoning about how to parse the blocks")
+    edits = dspy.OutputField(desc="List of (filename, search_text, replace_text) tuples. filename=None for shell commands")
 
 class DSPySearchReplaceModule(dspy.Module):
     """Module for generating code edits using DSPy"""
     def __init__(self, gpt_prompts=None):
         super().__init__()
         self.gpt_prompts = gpt_prompts
-        self.parse_predictor = dspy.Predict(ParseEditSignature)
-        self.find_predictor = dspy.Predict(FindEditSignature)
+        self.parse_predictor = dspy.ChainOfThought(ParseEditSignature)
+        self.find_predictor = dspy.ChainOfThought(FindEditSignature)
 
     def generate_edits(self, content: str, files: List[str]) -> List[Tuple[Optional[str], str, str]]:
         """Generate search/replace edits from LLM response using DSPy"""
         try:
-            result = self.parse_predictor(content=content, files=files)
+            result = self.parse_predictor(
+                content=content,
+                files=files,
+                prompt=self.gpt_prompts.parse_edits_prompt
+            )
+            print(f"Parsing reasoning: {result.reasoning}")
             return result.edits
         except Exception as e:
             print(f"DSPy edit parsing failed: {e}")
@@ -41,8 +46,10 @@ class DSPySearchReplaceModule(dspy.Module):
             result = self.find_predictor(
                 content=content,
                 search=search,
-                replace=replace
+                replace=replace,
+                prompt=self.gpt_prompts.find_replace_prompt
             )
+            print(f"Replacement reasoning: {result.reasoning}")
             return result.result
         except Exception as e:
             print(f"DSPy content replacement failed: {e}")
