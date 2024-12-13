@@ -7,7 +7,7 @@ class DSPySearchReplaceCoder(Coder):
     def __init__(self, main_model, io, **kwargs):
         super().__init__(main_model, io, **kwargs)
         self.dspy_search_replace = DSPySearchReplaceModule()
-        self.gpt_prompts = kwargs.get("gpt_prompts") or main_model.gpt_prompts  # Ensure gpt_prompts is accessible
+        self.gpt_prompts = kwargs.get("gpt_prompts")
 
     def apply_edit(self, edit, fname, content):
         search_text, replace_text = edit
