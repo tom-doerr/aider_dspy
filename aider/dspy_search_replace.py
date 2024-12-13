@@ -20,8 +20,8 @@ class ParseEditSignature(dspy.Signature):
 
 class DSPySearchReplaceModule(dspy.Module):
     """Module for generating code edits using DSPy"""
-    def __init__(self, gpt_prompts=None, model=None):
-        super().__init__(model=model)
+    def __init__(self, gpt_prompts=None):
+        super().__init__()
         super().__init__()
         self.gpt_prompts = gpt_prompts
         self.parse_predictor = dspy.ChainOfThought(ParseEditSignature)
