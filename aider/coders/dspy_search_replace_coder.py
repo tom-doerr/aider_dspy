@@ -26,7 +26,7 @@ class DSPySearchReplaceCoder(Coder):
 
             if Path(full_path).exists():
                 content = self.io.read_text(full_path)
-                new_content = do_replace(full_path, content, original, updated, self.fence)
+                new_content = self.dspy_do_replace(full_path, content, original, updated, self.fence)
 
             updated_edits.append((path, original, updated))
 
@@ -89,17 +89,28 @@ Just reply with fixed versions of the {blocks} above that failed to match.
 
     def get_edits(self):
         content = self.partial_response_content
-
-        # might raise ValueError for malformed ORIG/UPD blocks
-        edits = list(
-            find_original_update_blocks(
-                content,
-                self.fence,
-                self.get_inchat_relative_files(),
-            )
+        
+        # Use DSPy to generate search/replace pairs
+        edits = self.dspy_search_replace.generate_edits(
+            content=content,
+            files=self.get_inchat_relative_files()
         )
-
+        
+        # Extract shell commands if any
         self.shell_commands += [edit[1] for edit in edits if edit[0] is None]
         edits = [edit for edit in edits if edit[0] is not None]
 
         return edits
+
+    def dspy_do_replace(self, fname, content, original, updated, fence=None):
+        """DSPy-specific version of do_replace that uses DSPy signatures"""
+        if not original.strip():
+            # append to existing file, or start a new file
+            return content + updated
+            
+        # Use DSPy to find and replace the content
+        return self.dspy_search_replace.replace_content(
+            content=content,
+            search=original,
+            replace=updated
+        )
