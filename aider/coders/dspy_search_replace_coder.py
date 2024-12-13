@@ -4,8 +4,8 @@ from aider.dspy_search_replace import DSPySearchReplaceModule
 class DSPySearchReplaceCoder(Coder):
     edit_format = "dspy-search-replace"
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, main_model, io, **kwargs):
+        super().__init__(main_model, io, **kwargs)
         self.dspy_search_replace = DSPySearchReplaceModule()
 
     def apply_edit(self, edit, fname, content):
