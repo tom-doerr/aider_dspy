@@ -1,7 +1,8 @@
 from aider.coders.base_coder import Coder
 from aider.dspy_search_replace import DSPySearchReplaceModule
 from aider.coders.editblock_prompts import EditBlockPrompts
-from aider.coders.editblock_coder import find_original_update_blocks
+from aider.coders.editblock_coder import find_original_update_blocks, do_replace, find_similar_lines
+from pathlib import Path
 
 
 class DSPySearchReplaceCoder(Coder):
