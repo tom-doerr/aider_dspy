@@ -124,23 +124,3 @@ Return the modified content if a match is found, otherwise return None."""
             print(f"DSPy edit generation failed: {e}")
             return []
 
-    def replace_content(self, content: str, search: str, replace: str) -> Optional[str]:
-        """Replace search text with replace text in content"""
-        if not search.strip():
-            return content + replace
-            
-        # Find exact match
-        if search in content:
-            return content.replace(search, replace, 1)
-            
-        # Try matching ignoring whitespace
-        search_lines = search.splitlines()
-        content_lines = content.splitlines()
-        
-        for i in range(len(content_lines) - len(search_lines) + 1):
-            chunk = content_lines[i:i + len(search_lines)]
-            if all(s.strip() == c.strip() for s, c in zip(search_lines, chunk)):
-                content_lines[i:i + len(search_lines)] = replace.splitlines()
-                return '\n'.join(content_lines)
-                
-        return None
