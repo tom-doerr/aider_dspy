@@ -97,10 +97,13 @@ Return the modified content if a match is found, otherwise return None."""
                         i += 1
                         
                     if current_file:
+                        # Remove any trailing whitespace but ensure one newline at end
+                        search_content = "\n".join(search_lines).rstrip() + "\n"
+                        replace_content = "\n".join(replace_lines).rstrip() + "\n"
                         edits.append((
                             current_file,
-                            "\n".join(search_lines),
-                            "\n".join(replace_lines)
+                            search_content,
+                            replace_content
                         ))
                 i += 1
             
