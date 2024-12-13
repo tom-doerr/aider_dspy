@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-transport-https ca-certificates gnupg && \
     wget -q -O - https://www.debian.org/archive/key-6.0 | gpg --dearmor -o /usr/share/keyrings/debian-archive-keyring.gpg && \
