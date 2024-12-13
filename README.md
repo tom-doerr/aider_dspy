@@ -1,6 +1,8 @@
 
 # aider-dspy: DSPy-powered AI pair programming
 
+> ⚠️ **Warning**: This is a work in progress experimental fork of aider. The DSPy integration is still under active development and may not be fully stable.
+
 A fork of [aider](https://github.com/paul-gauthier/aider) that enhances code editing capabilities using DSPy (Deep Structured Programming).
 
 ## Overview
