@@ -11,7 +11,7 @@ class SearchReplaceSignature(dspy.Signature):
 
 class DSPySearchReplaceModule(dspy.Module):
     """Module for generating code edits using DSPy"""
-    def __init__(self):
+    def __init__(self, gpt_prompts=None):
         super().__init__()
         self.search_replace_predictor = dspy.Predict(SearchReplaceSignature)
 
