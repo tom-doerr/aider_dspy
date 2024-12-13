@@ -1,13 +1,22 @@
 
-<!-- Edit README.md, not index.md -->
+# aider-dspy: DSPy-powered AI pair programming
 
-# Aider is AI pair programming in your terminal
+A fork of [aider](https://github.com/paul-gauthier/aider) that enhances code editing capabilities using DSPy (Deep Structured Programming).
 
-Aider lets you pair program with LLMs,
-to edit code in your local git repository.
-Start a new project or work with an existing git repo.
-Aider works best with GPT-4o & Claude 3.5 Sonnet and can 
-[connect to almost any LLM](https://aider.chat/docs/llms.html).
+## Overview
+
+aider-dspy extends aider's capabilities by integrating DSPy for more robust code editing and generation. It maintains aider's core functionality while adding DSPy-powered features for improved code manipulation.
+
+## Key Features
+
+- **DSPy Integration**: Uses DSPy's ChainOfThought for parsing and code manipulation
+- **Exact Matching**: Ensures precise code replacements with character-by-character matching
+- **Structured Editing**: Leverages DSPy signatures for well-defined edit operations
+- **All Original Aider Features**: Maintains all the powerful features from the original aider:
+  - Git integration with automatic commits
+  - Multi-file editing
+  - Real-time file watching
+  - Support for multiple LLMs
 
 <!-- SCREENCAST START -->
 <p align="center">
