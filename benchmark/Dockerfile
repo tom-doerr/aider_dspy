@@ -1,7 +1,11 @@
 FROM python:3.10-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-transport-https ca-certificates gnupg && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9 6ED0E7B82643E131 54404762BBB6E853 BDE6D2B9216EC7A8 F8D2585B8783D481 && \
+    wget -q -O - https://www.debian.org/archive/key-6.0 | gpg --dearmor -o /usr/share/keyrings/debian-archive-keyring.gpg && \
+    wget -q -O - https://www.debian.org/security/archive-key-6 | gpg --dearmor -o /usr/share/keyrings/debian-security-archive-keyring.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian bookworm main contrib non-free" > /etc/apt/sources.list.d/debian.list && \
+    echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian bookworm-updates main contrib non-free" >> /etc/apt/sources.list.d/debian.list && \
+    echo "deb [signed-by=/usr/share/keyrings/debian-security-archive-keyring.gpg] http://deb.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list.d/debian.list && \
     apt-get update
 COPY . /aider
 RUN pip install --no-cache-dir --upgrade pip
