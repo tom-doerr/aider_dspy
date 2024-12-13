@@ -24,7 +24,9 @@ class DSPySearchReplaceModule(dspy.Module):
         super().__init__()
         self.gpt_prompts = gpt_prompts
         if model:
-            dspy.settings.configure(lm=model)
+            # Create a DSPy-compatible model wrapper
+            dspy_model = dspy.OpenAI(model=model.model_name)
+            dspy.settings.configure(lm=dspy_model)
         self.parse_predictor = dspy.ChainOfThought(ParseEditSignature)
         self.find_predictor = dspy.ChainOfThought(FindEditSignature)
 
