@@ -11,22 +11,92 @@ class DSPySearchReplaceCoder(Coder):
         super().__init__(main_model, io, **kwargs)
         self.dspy_search_replace = DSPySearchReplaceModule()
 
-    def apply_edit(self, edit, fname, content):
-        search_text, replace_text = edit
-        if search_text is None or replace_text is None:
-            return content
+    def apply_edits(self, edits, dry_run=False):
+        failed = []
+        passed = []
+        updated_edits = []
 
-        return content.replace(search_text, replace_text)
+        for edit in edits:
+            path, original, updated = edit
+            full_path = self.abs_root_path(path)
+            new_content = None
 
-    # def get_edits(self, fnames, content, edit_request):
+            if Path(full_path).exists():
+                content = self.io.read_text(full_path)
+                new_content = do_replace(full_path, content, original, updated, self.fence)
+
+            updated_edits.append((path, original, updated))
+
+            if new_content:
+                if not dry_run:
+                    self.io.write_text(full_path, new_content)
+                passed.append(edit)
+            else:
+                failed.append(edit)
+
+        if dry_run:
+            return updated_edits
+
+        if not failed:
+            return
+
+        blocks = "block" if len(failed) == 1 else "blocks"
+
+        res = f"# {len(failed)} SEARCH/REPLACE {blocks} failed to match!\n"
+        for edit in failed:
+            path, original, updated = edit
+
+            full_path = self.abs_root_path(path)
+            content = self.io.read_text(full_path)
+
+            res += f"""
+## SearchReplaceNoExactMatch: This SEARCH block failed to exactly match lines in {path}
+<<<<<<< SEARCH
+{original}=======
+{updated}>>>>>>> REPLACE
+
+"""
+            did_you_mean = find_similar_lines(original, content)
+            if did_you_mean:
+                res += f"""Did you mean to match some of these actual lines from {path}?
+
+{self.fence[0]}
+{did_you_mean}
+{self.fence[1]}
+
+"""
+
+            if updated in content and updated:
+                res += f"""Are you sure you need this SEARCH/REPLACE block?
+The REPLACE lines are already in {path}!
+
+"""
+        res += (
+            "The SEARCH section must exactly match an existing block of lines including all white"
+            " space, comments, indentation, docstrings, etc\n"
+        )
+        if passed:
+            pblocks = "block" if len(passed) == 1 else "blocks"
+            res += f"""
+# The other {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.
+Don't re-send them.
+Just reply with fixed versions of the {blocks} above that failed to match.
+"""
+        raise ValueError(res)
+
     def get_edits(self):
-        edits = {}
-        for fname, file_content in zip(fnames, content):
-            edit = self.dspy_search_replace.generate_search_replace(
-                file_name=fname,
-                file_content=file_content,
-                edit_request=edit_request,
+        content = self.partial_response_content
+
+        # might raise ValueError for malformed ORIG/UPD blocks
+        edits = list(
+            find_original_update_blocks(
+                content,
+                self.fence,
+                self.get_inchat_relative_files(),
             )
-            if edit:
-                edits[fname] = edit
+        )
+
+        self.shell_commands += [edit[1] for edit in edits if edit[0] is None]
+        edits = [edit for edit in edits if edit[0] is not None]
+
         return edits
