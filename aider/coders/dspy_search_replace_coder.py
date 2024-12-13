@@ -1,8 +1,6 @@
 from aider.coders.base_coder import Coder
 from aider.dspy_search_replace import DSPySearchReplaceModule
 from aider.coders.editblock_prompts import EditBlockPrompts
-from aider.coders.editblock_coder import find_original_update_blocks, do_replace, find_similar_lines
-from pathlib import Path
 from pathlib import Path
 
 
@@ -12,7 +10,7 @@ class DSPySearchReplaceCoder(Coder):
 
     def __init__(self, main_model, io, **kwargs):
         super().__init__(main_model, io, **kwargs)
-        self.dspy_search_replace = DSPySearchReplaceModule()
+        self.dspy_search_replace = DSPySearchReplaceModule(self.gpt_prompts)
 
     def apply_edits(self, edits, dry_run=False):
         failed = []
