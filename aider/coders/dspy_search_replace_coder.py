@@ -1,6 +1,7 @@
 from aider.coders.base_coder import Coder
 from aider.dspy_search_replace import DSPySearchReplaceModule
 from aider.coders.editblock_prompts import EditBlockPrompts
+from aider.coders.editblock_coder import find_similar_lines
 from pathlib import Path
 
 
